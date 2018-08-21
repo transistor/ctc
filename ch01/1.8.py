@@ -1,54 +1,75 @@
 """ Zero Matrix
 
-    Approach: Create a duplicate of the input matrix, then scan the
-    input for zeroes. For each zero encountered, zero-out the
-    corresponding row and column in the output matrix.
+    M1) Scan the matrix and save the x,y coordinates of each zero in separate
+        sets. Use the two sets to zero-out rows and columns, accordingly.
 
-    It is possible to do this in-place while maintaining a history of
-    rows and columns that have been zeroed-out, but it is much cleaner
-    to use a duplicate matrix
+    M2) An in-place approach is to find and mark zeroes with an identifying
+        value (e.g.: '@'), and then using a second pass to zero-out rows and 
+        columns based on the @.
 
-    If you want to do it in-place, perform an initial pass to find all
-    zeroes. Then, iterate over the zeroes you've found, and zero-out
-    the corresponding rows and columns.
+        Careful: when zeroing-out a row/column, any @ element cannot be
+        converted to zero. The @ characters are only switched to zero when they
+        are being used to zero-out a row/column.
 """
 
-def zero_matrix(m):
-    """ Matrix representation will be in the form of a list of lists  """
+def zero_set(m):
+    """ M1 """
 
-    # Create duplicate matrix (assume that matrix is valid in structure)
-    N = len(m)
-    M = len(m[0])
+    row_zeroes, col_zeroes = set(), set()
 
-    # Deep copy
-    zeroed = []
-    for i, row in enumerate(m):
-        row_copy = []
-        for j, col in enumerate(row):
-            row_copy.append(m[i][j])
-        zeroed.append(row_copy)
+    rows = len(m)
+    cols = len(m[0])
 
-    # Scan through matrix to find zeroes and then zero-out
-    for i, row in enumerate(m):
-        for j, col in enumerate(row):
-            if (m[i][j] == 0):
-                # Zero-out row i and column j in duplicate matrix
-                # length of rows: M (= number of columns)
-                # height of columns: N (= number of rows)
-                
-                for idx in xrange(M):
-                    zeroed[i][idx] = 0       # Zero-out row
+    # Find zeroes
+    for i in xrange(rows):
+        for j in xrange(cols):
+            if m[i][j] == 0:
+                row_zeroes.add(i)
+                col_zeroes.add(j)
 
-                for idx in xrange(N):
-                    zeroed[idx][j] = 0       # Zero-out column
+    # Zero-out rows/cols
+    for row in row_zeroes:
+        for j in xrange(cols):
+            m[row][j] = 0
 
-    #print("Zeroed:")
-    #for row in zeroed:
-    #    print row
+    for col in col_zeroes:
+        for i in xrange(rows):
+            m[i][col] = 0
 
-    return zeroed
+    return m
 
-zm = zero_matrix
+def zero_flip(m):
+    """ M2 """
+
+    rows = len(m)
+    cols = len(m[0])
+
+    # Find zeroes
+    for i in xrange(rows):
+        for j in xrange(cols):
+            if m[i][j] == 0:
+                m[i][j] = '@'      # Identifying character
+
+    # Zero-out rows/cols
+    for i in xrange(rows):
+        for j in xrange(cols):
+            if m[i][j] == '@':
+                # Zero-out the '@' itself
+                m[i][j] = 0
+
+                # Zero-out the row and column (ignoring other '@' chars)
+                for c in xrange(cols):              # Zero-out row
+                    if m[i][c] != '@':
+                        m[i][c] = 0
+
+                for r in xrange(rows):              # Zero-out column
+                    if m[r][j] != '@':
+                        m[r][j] = 0 
+
+    return m
+
+zs = zero_set
+zf = zero_flip
 
 # Test cases
 x = [ [[1,2,3], [4,5,6], [7,8,9]],
@@ -76,11 +97,27 @@ y = [ [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
       [[1, 0], [0, 0], [5, 0]]
     ]
 
+# Note: run_tests() will modify the inputs in-place, so the tests can only be
+#       run once
 def run_tests():
-    try:
-        for i, m in enumerate(x):
-           assert(zero_matrix(m) == y[i])
+    for i, m in enumerate(x):
+        # Need a deep-copy of the inputs for the sake of test
+        mcopy = [e[:] for e in m]
+        zero_set(mcopy)
+        try:
+            assert(mcopy == y[i])
+        except AssertionError:
+            print("zero_set(): Error on test %i (input: %r)" % (i, m))
 
-        print("All tests passed")
-    except:
-        print("Error on test %i (input: %r)" % (i, m))
+        mcopy = [e[:] for e in m]
+        zero_flip(mcopy)
+        try:
+            assert(mcopy == y[i])
+        except AssertionError:
+            print("zero_flip(): Error on test %i (input: %r)" % (i, m))
+
+    print("All tests passed")
+
+rt = run_tests
+
+

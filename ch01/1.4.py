@@ -1,4 +1,6 @@
-""" The question is phrased in an awkward way. Restating it makes it simpler:
+""" 1.4: Palindrome Permutation
+
+    The question is phrased in an awkward way. Restating it makes it simpler:
     Can the letters of the input be arranged as a palindrome (even using
     words)?
 
@@ -23,43 +25,31 @@
 """
 
 def palindrome_permutation(s):
-    """ Bugs:
-            - Does not ignore whitespace
-            - Case-sensitive (obviously trivial to change)
+    """ Count frequency of each char. If only one char appears an odd number
+        of times, s can form a palindrome
+
+        Note: need to skip spaces for the question
     """
 
-    # Get number of unique characters
-    uniques = len(set(s))
-
-    # Use a dict to keep count of characters
-    count = {}
-
-    # Scan through input and count chars
+    freq = {}
     for c in s:
-        if (count.has_key(c)):
-            count[c] += 1
+        if c == ' ':
+            continue
+        elif c in freq:
+            freq[c] += 1
         else:
-            count[c] = 1
+            freq[c] = 1
 
-    # Check if case (1) or case (2) above is satisfied:
-    N = len(s)
+    # Check for single odd freq
+    odd_found = False
+    for v in freq.values():
+        if (v & 0x1):
+            if odd_found:
+                return False
+            else:
+                odd_found = True
 
-    if (N%2 == 0):       # even-length input
-        for key, val in count.iteritems():
-            if (val%2 != 0):
-                # Odd-number characters found
-                return 0    # No palindrome possible
-    else:
-        odd_found = False
-        for key, val in count.iteritems():
-            if (val%2 != 0):
-                if (odd_found):
-                    # Multiple odd-number characters found
-                    return 0    # No palindrome possible
-                else:
-                    odd_found = True
-
-    return 1    # palindrome is possible
+    return True
 
 pp = palindrome_permutation
 
@@ -74,7 +64,7 @@ def run_tests():
            assert(pp(s) == y[i])
 
         print("All tests passed")
-
-    except:
+    except AssertionError:
         print("Error on test %i (input: %s)" % (i,s))
-        
+
+rt = run_tests

@@ -1,4 +1,5 @@
-""" 
+""" 1.5: One Away
+
     This is a type of "edit distance" question
 
     Three types of edits:
@@ -6,105 +7,86 @@
         ii) Character removal
         iii) Character swap
 
-    The first two cases can be collapsed in to a single case by selecting the
-    shorter string (if there is one) as your 'start' string. This reduces the
-    amount of code you need to write
+    Assuming the inputs do not differ in length by more than 1 character, scan
+    through them and check for a mismatch. If a mismatch is found, consider the
+    three options we have for 'editing' the strings (insert/remove/swap).
 """
 
+def one_away_compact(a, b):
+    """ More compact code than second implementation below """
+
+    # Early exit
+    N, M = len(a), len(b)
+    if (abs(N-M) > 1):
+        return False
+    elif (not a and b or a and not b):
+        return False
+
+    # Check if there is a mismatch in the two strings up to min(N,M)
+    i = 0
+    while (i < min(N,M)):
+        if (a[i] == b[i]):
+            i += 1
+        else:
+            # Mismatch found. Check three options
+            first = a[i+1:] == b[i:]    # insert in to a / delete from b
+            second = a[i:] == b[i+1:]   # insert in to b / delete from a
+            third = a[i+1:] == b[i+1:]  # char swap
+            return (first or second or third)
+
+    # Fall-through: two possible cases, both returning True:
+    #   i) if (N==M), and no mismatch was found, then strings are identical
+    #
+    #   ii) if abs(N-M) == 1, and the first min(N,M) characters matched, then
+    #       the extra character in the longer string represents 1 insertion
+
+    return True
+
+
 def one_away(a, b):
-    """ See above  """
 
-    N = len(a)
-    M = len(b)
-    length_distance = abs(N-M)
+    # Early exit
+    N, M = len(a), len(b)
+    if abs(N-M) > 1:
+        return False
 
-    # We could do a string comparison up-front to see if strings are matching,
-    # but that is an O(n) operation by itself
+    # If strings are the same length, then the only possibility for handling
+    # a mismatch is a character replacement
+    if (N == M):
+        i = 0
+        while (i < N):
+            if a[i] != b[i]:                # Mismatch found
+                return a[i+1:] == b[i+1:]   # Remaining strings must be equal
 
-    if ( length_distance > 1 ):
-        return 0    # Lengths differ by more than 1
-    elif ( length_distance == 1 ):
-        # Check for insertion between shorter and longer string
-        shorter = a if N < M else b
-        longer = b if M > N else a
+            i += 1
 
-        # Count instances of each character found, then compare counts
-        long_count = {}
-        for c in longer:
-            if (long_count.has_key(c)):
-                long_count[c] += 1
-            else:
-                long_count[c] = 1
+        return True                         # Strings are equal
+    else:
+        # Strings differ in length by 1. Either a character must be deleted
+        # from one string, or inserted in to the other
+        #
+        # Idea: find the point of mismatch, then check if the remaining strings
+        #       match using either one insertion or deletion
+        if (N < M):
+            shorter, longer = a, b
+            len_s, len_l = N, M
+        else:
+            shorter, longer = b, a
+            len_s, len_l = M, N
 
-        # Compare counts against shorter string (subtract)
-        for c in shorter:
-            if (long_count.has_key(c)):
-                long_count[c] -= 1
-            else:
-                # longer string is missing this character
-                #print("missing %s" % c)
-                return 0
+        for i in xrange(len_s):
+            if shorter[i] != longer[i]:
+                if (shorter[i:] == longer[i+1:]):       # Delete from longer
+                    return True
+                elif (shorter[i+1] == longer[i:]):      # Insert in shorter
+                    return True
+                else:                                   # Neither work
+                    return False
 
-        dist_one = False
-        for k,v in long_count.iteritems():
-            # All entries should be zero, with one entry value being 1
-            if v == 0:
-                pass
-            elif v == 1:
-                if dist_one == False:
-                    dist_one = True
-                else:
-                    # Multiple new characters in longer string
-                    return 0
-            else:
-                # Multiple unmatched characters
-                return 0
-
-        if (dist_one):
-            return 1    # Longer string has exactly 1 insertion over shorter string
-
-    elif ( length_distance == 0 ):
-        # Check for character swap between strings
-        # Same method as above will work, but the end result should be that there
-        # is 1 of one character, and -1 of another character
-
-        a_count = {}
-        for c in a:
-            if (a_count.has_key(c)):
-                a_count[c] += 1
-            else:
-                a_count[c] = 1
-
-        for c in b:
-            if (a_count.has_key(c)):
-                a_count[c] -= 1
-            else:
-                a_count[c] = -1
-
-        plus_one = False
-        minus_one = False
-        for k,v in a_count.iteritems():
-            # All entries should be zero, with one entry value being 1, and one being -1
-            if v == 0:
-                pass
-            elif v == 1:
-                if plus_one == False:
-                    plus_one = True
-                else:
-                    # Multiple new characters in longer string
-                    return 0
-            elif v == -1:
-                if minus_one == False:
-                    minus_one = True
-                else:
-                    # Multiple missing
-                    return 0
-            else:
-                # Multiple unmatched characters
-                return 0
-
-        # If we have fallen through to here, either the strings are one-away, or zero-away
-        return 1
+        # Fall-through: the strings match up to the final char. Thus, a deletion
+        # of the final char in the longer string, or an insertion on to the
+        # shorter string, create a match
+        return True
 
 # Test cases
 x = [('', ''), ('hi', 'hi'), ('pale', 'ple'), ('pales', 'pale'), ('pale', 'bale'), ('pale', 'bake'), ('hello', 'HeLlo'), ('ball', 'fell'), ('ii', 'jj')]
@@ -115,9 +97,8 @@ def run_tests():
         for i, test_pair in enumerate(x):
             a, b = test_pair
             assert(one_away(a,b) == y[i])
-
         print("All tests passed")
-
-    except:
+    except AssertionError:
         print("Error on test %i (input: %s, %s)" % (i, a, b))
-        
+
+rt = run_tests

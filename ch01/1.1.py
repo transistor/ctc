@@ -1,34 +1,38 @@
-# Note: We are assuming case-sensitivity
+""" 1.1: Is Unique """
+
+# Note: Assume strings are case-sensitive
 
 def is_unique(s):
-    """ Using additional data structure
+    """ Using additional data structure: O(n) time and space.
 
         A set cannot have duplicates. By creating a set of the characters
         in the string, duplicates will lead to a set length different than
         the string length
     """
 
-    s_set = set(s)
-    if (len(s) == len(s_set)):
-        return 1    # All characters are unique
-    else:
-        return 0
+    seen = set()
+    for c in s:
+        if c in seen:
+            return False
+        
+        seen.add(c)
+
+    return True
+
 
 def is_unique_in_place(s):
-    """ No additional data structure
+    """ No additional data structure: O(1) space
 
-        Iterate over each character twice, essentially. This is ~O(n**2)
+        Iterate over each character twice, essentially. This is O(n^2) time.
     """
-
     N = len(s)
-    for i, pivot in enumerate(s):
-        for compare in s[i+1:]:
-            if pivot == compare:
-                return 0    # Duplicate found
-            else:
-                pass
+    for i in xrange(N):
+        c = s[i]
+        for j in xrange(i+1, N):
+            if (s[j] == c):
+                return False
 
-    return 1    # All unique
+    return True
 
 
 # Test cases
@@ -40,8 +44,8 @@ def run_tests():
         for i, test_string in enumerate(x):
             assert(is_unique(test_string) == y[i])
             assert(is_unique_in_place(test_string) == y[i])
-
         print("All tests passed")
-    except:
+    except AssertionError:
         print("Error on test %i (input: %r)" % (i, test_string))
 
+rt = run_tests

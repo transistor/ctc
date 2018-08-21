@@ -1,4 +1,5 @@
-""" 
+""" 1.9: String Rotation
+
     This problem is a puzzle, not a coding problem.
 
     If you want to find out if s1 is a rotation of s2, simple concatenate two
@@ -16,14 +17,11 @@
 """
 
 def is_substring(s1, s2):
-    """ The question says that you are given this method. It is simple to write in Python """
-    if s1 in s2:
-        return 1
-    else:
-        return 0
+    """ The question says that you are given this method """
+
+    return (s1 in s2)
 
 def is_rotation(s1, s2):
-
     return is_substring(s1, s2*2)
 
 # Test cases
@@ -37,5 +35,7 @@ def run_tests():
             assert(is_rotation(s1, s2) == y[i])
 
         print("All tests passed")
-    except:
+    except AssertionError:
         print("Error on test %i (input: %s, %s)" % (i, s1, s2))
+
+rt = run_tests

@@ -1,64 +1,16 @@
-""" Rotate 2D arrays
+""" 1.7: Rotate Matrix
 
     Creator of CTC explains a good solution here:
         https://www.youtube.com/watch?v=aClxtDcdpsQ
         https://www.youtube.com/watch?v=Jtu6dJ0Cb94
+
+    NO NO NO NO NO NO. NO.
+
 """
 from math import ceil
 
 def rotate(m):
-    """ This ends up modifying 'm' in-place """
-
-    N = len(m)
-    assert(N == len(m[0]))
-
-    if (N == 1):
-        return m
-    elif (N == 2):
-        return [[m[1][0], m[0][0]], [m[1][1], m[0][1]]]
-    else:
-        layers = int(ceil(N/2))
-        for k in xrange(layers):
-            M = N - k*2                 # Width/height of current layer
-            first = k
-            last = N - k - 1
-
-            for i in xrange(M-1):
-                # 4-way swap
-                #print("(%i,%i) -> (%i,%i)" % (first,first+i,first+i,last))
-                #print("(%i,%i) -> (%i,%i)" % (first+i,last,last,last-i))
-                #print("(%i,%i) -> (%i,%i)" % (last,last-i,last-i,first))
-                #print("(%i,%i) -> (%i,%i)" % (last-i,first,first,first+i))
-                #print("-")
-                #print("(%i,%i) -> (%i,%i)" % (0,i,i,last))
-                #print("(%i,%i) -> (%i,%i)" % (i,last,last,last-i))
-                #print("(%i,%i) -> (%i,%i)" % (last,last-i,last-i,0))
-                #print("(%i,%i) -> (%i,%i)" % (last-i,0,0,i))       # error?
-                #print("----")
-
-                # Actual swaps will be done in reverse order to limit the
-                # number of temp variables
-
-                tmp_top = m[first][first+i]
-
-                # Left column to top row
-                m[first][first+i] = m[last-i][first]
-
-                # Bottom row to left column
-                m[last-i][first] = m[last][last-i]
-
-                # Right column to bottom row
-                m[last][last-i] = m[first+i][last]
-
-                # Top row to right column
-                m[first+i][last] = tmp_top
-
-                #print("-=-")
-                #for row in m:
-                #    print row
-                #print("-=-")
-
-        return m
+    pass
 
 r = rotate
 
@@ -84,6 +36,7 @@ def run_tests():
            assert(rotate(m) == y[i])
 
         print("All tests passed")
-
-    except:
+    except AssertionError:
         print("Error on test %i (input: %r)" % (i, m))
+
+rt = run_tests

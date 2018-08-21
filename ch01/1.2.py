@@ -1,20 +1,38 @@
-# Note: Do not mistakes rotations and permutations. Rotations *are* permutations,
-#       but there are more permutations than rotations for inputs of length >= 3
+""" 1.2: Check Permutation """
+
+# Note: Do not mistakes rotations and permutations. Rotations *are* 
+#       permutations, but there are more permutations than rotations for inputs 
+#       of length >= 3
 #
 #   'hello', 'elhol'    -- permutations
 #   'hello', 'lohel'    -- simple rotation (which is also a permutation)
 
 def check_permutations_sets(a, b):
-    """ M1) Convert each string to sets, then compare sets """
+    """ M1) Count frequency of each character in 'a', then subtract each
+            character in 'b'. If there is a decrement from zero, we can exit
+            early. If the frequency count isn't all zero at the end, the
+            strings are not permutations
+    """
+    freq = {}
+    for c in a:
+        if c in freq:
+            freq[c] += 1
+        else:
+            freq[c] = 1
 
-    # Testing the length is essential for this approach
-    if (len(a) != len(b)):
-        return 0        # Uneven length => not permutations
+    for c in b:
+        if (c not in freq) or (freq[c] == 0):
+            # Cannot subtract from zero (b has more of this char than a)
+            return False
+        else:
+            freq[c] -= 1
 
-    if (set(a) == set(b)):
-        return 1
-    else:
-        return 0
+    # Ensure all vals in dict are zero
+    for v in freq.values():
+        if (v != 0):
+            return False
+
+    return True
 
 def check_permutations_sort(a,b):
     """ M2) Sort each string, then compare from beginning to end
@@ -23,25 +41,11 @@ def check_permutations_sort(a,b):
             plus O(N) on the string explode
     """
 
-    if (len(a) != len(b)):
-        return 0 
-
-    asplit = [c for c in a]
-    bsplit = [c for c in b]
-    asplit.sort()
-    bsplit.sort()
-
-    N = len(a)
-    for i in xrange(N):
-        if (asplit[i] != bsplit[i]):
-            return 0
-
-    return 1    # All characters matched
-
+    return bool(sorted(a) == sorted(b))
 
 # Test cases
-x = [('', ''), ('  ', '  '), ('A', 'A'), ('hi', 'ih'), ('Hello', 'loHel'), ('hello', 'jello'), ('spin', 'twin')]
-y = [True, True, True, True, True, False, False]
+x = [('', ''), ('  ', '  '), ('A', 'A'), ('hi', 'ih'), ('Hello', 'loHel'), ('hello', 'jello'), ('spin', 'twin'), ('aaabc', 'abbbc')]
+y = [True, True, True, True, True, False, False, False]
 
 def run_tests():
     try:
@@ -51,6 +55,7 @@ def run_tests():
             assert(check_permutations_sort(a,b) == y[i])
 
         print("All tests passed")
-    except:
+    except AssertionError:
         print("Error on test %i (input: %s, %s)" % (i, a, b))
 
+rt = run_tests
